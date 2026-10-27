@@ -1,8 +1,4 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Q1Test {
      public static void main(String[] args) {
@@ -76,15 +72,6 @@ public class Q1Test {
                Arrays.stream(traversal3.split("-")).mapToInt(Integer::parseInt).toArray(),
           };
           if (!(traversals[0].length == traversals[1].length && traversals[1].length == traversals[2].length)) return "Invalid traversals";
-          String[] result = verifyInner(traversals);
-          if (result == null) return "Invalid traversals";
-          return String.format("Traversal 1 - %s, Traversal 2 - %s, Traversal 3 - %s", result[0], result[1], result[2]);
-
-     }
-     private static String[] verifyInner(int[][] traversals) {
-          if (traversals[0].length == 0) return new String[]{};
-          if (traversals[0].length == 1 && traversals[0][0] == traversals[1][0] && traversals[1][0] == traversals[2][0]) return new String[]{};
-          if (traversals[0].length == 1) return null;
 
           String[] out = new String[3];
 
@@ -103,28 +90,34 @@ public class Q1Test {
           }
           if (inorder == null) return null;
 
-          int[] traversal1 = traversals[inorderIndex == 0 ? 2 : 0];
-          int[] traversal2 = traversals[inorderIndex == 1 ? 2 : 1];
+          int[] traversalA = traversals[inorderIndex == 0 ? 2 : 0];
+          int[] traversalB = traversals[inorderIndex == 1 ? 2 : 1];
           int[] preorder = null;
           int[] postorder = null;
-          int root = -1;
-          if (traversal1[0] == traversal2[traversal2.length - 1]) {
-               preorder = traversal1;
-               postorder = traversal2;
+          if (traversalA[0] == traversalB[traversalB.length - 1]) {
+               preorder = traversalA;
+               postorder = traversalB;
                out[inorderIndex == 0 ? 2 : 0] = "Preorder";
                out[inorderIndex == 1 ? 2 : 1] = "Postorder";
-               root = traversal1[0];
-          } else if (traversal1[traversal1.length - 1] == traversal2[0]) {
-               // if (preorder != null) return null;
-               preorder = traversal2;
-               postorder = traversal1;
+          } else if (traversalA[traversalB.length - 1] == traversalB[0]) {
+               preorder = traversalB;
+               postorder = traversalA;
                out[inorderIndex == 1 ? 2 : 1] = "Preorder";
                out[inorderIndex == 0 ? 2 : 0] = "Postorder";
-               root = traversal2[0];
           }
           if (preorder == null) return null;
 
+          if (!verifyInner(inorder, preorder, postorder)) return "Invalid traversals";
+          return String.format("Traversal 1 - %s, Traversal 2 - %s, Traversal 3 - %s", out[0], out[1], out[2]);
 
+     }
+     private static boolean verifyInner(int[] inorder, int[] preorder, int[] postorder) {
+          if (inorder.length == 0) return true;
+          if (inorder.length == 1) {
+               return inorder[0] == preorder[0] && preorder[0] == postorder[0];
+          }
+
+          int root = preorder[0];
           int inorderRootElemIndex = -1;
           for (int j = 0; j < inorder.length; j++) {
                if (inorder[j] == root) {
@@ -132,10 +125,7 @@ public class Q1Test {
                     break;
                }
           }
-          if (inorderRootElemIndex == -1) return null;
-
-          System.out.println(Arrays.deepToString(traversals));
-          System.out.println(Arrays.deepToString(out));
+          if (inorderRootElemIndex == -1) return false;
 
           int leftBranchLength = inorderRootElemIndex;
           int rightBranchLength = inorder.length - 1 - leftBranchLength;
@@ -151,11 +141,11 @@ public class Q1Test {
           System.out.println(Arrays.deepToString(new int[][] {inorderRightBranch, preorderRightBranch, postorderRightBranch}));
           System.out.println();
 
-          String[] leftBranchResult = verifyInner(new int[][] {inorderLeftBranch, preorderLeftBranch, postorderLeftBranch});
-          String[] rightBranchResult = verifyInner(new int[][] {inorderRightBranch, preorderRightBranch, postorderRightBranch});
-          if (leftBranchResult == null) return null;
-          if (rightBranchResult == null) return null;
+          boolean leftBranchResult = verifyInner(inorderLeftBranch, preorderLeftBranch, postorderLeftBranch);
+          boolean rightBranchResult = verifyInner(inorderRightBranch, preorderRightBranch, postorderRightBranch);
+          if (!leftBranchResult) return false;
+          if (!rightBranchResult) return false;
 
-          return out;
+          return true;
      }
 }
