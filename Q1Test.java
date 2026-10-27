@@ -108,9 +108,7 @@ public class Q1Test {
           if (preorder == null) return "Invalid traversals";
 
           if (!verifyInner(inorder, preorder, postorder)) return "Invalid traversals";
-          String result = String.format("Traversal 1 - %s, Traversal 2 - %s, Traversal 3 - %s", out[0], out[1], out[2]);
-          System.out.println(result);
-          return result;
+          return String.format("Traversal 1 - %s, Traversal 2 - %s, Traversal 3 - %s", out[0], out[1], out[2]);
 
      }
      private static boolean verifyInner(int[] inorder, int[] preorder, int[] postorder) {
@@ -138,10 +136,6 @@ public class Q1Test {
           int[] postorderRightBranch = Arrays.copyOfRange(postorder, leftBranchLength, leftBranchLength + rightBranchLength);
           int[] inorderLeftBranch = Arrays.copyOfRange(inorder, 0, leftBranchLength);
           int[] inorderRightBranch = Arrays.copyOfRange(inorder, inorderRootElemIndex + 1, inorderRootElemIndex + rightBranchLength + 1);
-
-          // System.out.println(Arrays.deepToString(new int[][] {inorderLeftBranch, preorderLeftBranch, postorderLeftBranch}));
-          // System.out.println(Arrays.deepToString(new int[][] {inorderRightBranch, preorderRightBranch, postorderRightBranch}));
-          // System.out.println();
 
           if (preorderLeftBranch.length != 0 && preorderLeftBranch[0] >= root) return false;
           if (preorderRightBranch.length != 0 && preorderRightBranch[0] <= root) return false;
