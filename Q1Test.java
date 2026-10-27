@@ -88,7 +88,7 @@ public class Q1Test {
                out[inorderIndex] = "Inorder";
                break;
           }
-          if (inorder == null) return null;
+          if (inorder == null) return "Invalid traversals";
 
           int[] traversalA = traversals[inorderIndex == 0 ? 2 : 0];
           int[] traversalB = traversals[inorderIndex == 1 ? 2 : 1];
@@ -105,7 +105,7 @@ public class Q1Test {
                out[inorderIndex == 1 ? 2 : 1] = "Preorder";
                out[inorderIndex == 0 ? 2 : 0] = "Postorder";
           }
-          if (preorder == null) return null;
+          if (preorder == null) return "Invalid traversals";
 
           if (!verifyInner(inorder, preorder, postorder)) return "Invalid traversals";
           return String.format("Traversal 1 - %s, Traversal 2 - %s, Traversal 3 - %s", out[0], out[1], out[2]);
