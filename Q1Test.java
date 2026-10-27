@@ -66,20 +66,21 @@ public class Q1Test {
 
       // write your codes here
      public static String verify(String traversal1, String traversal2, String traversal3){
-          int[][] traversals = {
-               Arrays.stream(traversal1.split("-")).mapToInt(Integer::parseInt).toArray(),
-               Arrays.stream(traversal2.split("-")).mapToInt(Integer::parseInt).toArray(),
-               Arrays.stream(traversal3.split("-")).mapToInt(Integer::parseInt).toArray(),
+          @SuppressWarnings("unchecked")
+          List<Integer>[] traversals = (List<Integer>[]) new List[] {
+               Arrays.stream(traversal1.split("-")).map(Integer::parseInt).toList(),
+               Arrays.stream(traversal2.split("-")).map(Integer::parseInt).toList(),
+               Arrays.stream(traversal3.split("-")).map(Integer::parseInt).toList(),
           };
-          if (!(traversals[0].length == traversals[1].length && traversals[1].length == traversals[2].length)) return "Invalid traversals";
+          if (!(traversals[0].size() == traversals[1].size() && traversals[1].size() == traversals[2].size())) return "Invalid traversals";
 
           String[] out = new String[3];
 
-          int[] inorder = null;
+          List<Integer> inorder = null;
           int inorderIndex = 0;
-          outer: for (int[] traversal : traversals) {
-               for (int j = 0; j < traversal.length - 1; j++) {
-                    if (traversal[j] >= traversal[j+1]) {
+          outer: for (List<Integer> traversal : traversals) {
+               for (int j = 0; j < traversal.size() - 1; j++) {
+                    if (traversal.get(j) >= traversal.get(j+1)) {
                          inorderIndex++;
                          continue outer;
                     }
@@ -90,16 +91,16 @@ public class Q1Test {
           }
           if (inorder == null) return "Invalid traversals";
 
-          int[] traversalA = traversals[inorderIndex == 0 ? 2 : 0];
-          int[] traversalB = traversals[inorderIndex == 1 ? 2 : 1];
-          int[] preorder = null;
-          int[] postorder = null;
-          if (traversalA[0] == traversalB[traversalB.length - 1]) {
+          List<Integer> traversalA = traversals[inorderIndex == 0 ? 2 : 0];
+          List<Integer> traversalB = traversals[inorderIndex == 1 ? 2 : 1];
+          List<Integer> preorder = null;
+          List<Integer> postorder = null;
+          if (traversalA.getFirst() == traversalB.getLast()) {
                preorder = traversalA;
                postorder = traversalB;
                out[inorderIndex == 0 ? 2 : 0] = "Preorder";
                out[inorderIndex == 1 ? 2 : 1] = "Postorder";
-          } else if (traversalA[traversalB.length - 1] == traversalB[0]) {
+          } else if (traversalA.getLast() == traversalB.getFirst()) {
                preorder = traversalB;
                postorder = traversalA;
                out[inorderIndex == 1 ? 2 : 1] = "Preorder";
@@ -111,34 +112,27 @@ public class Q1Test {
           return String.format("Traversal 1 - %s, Traversal 2 - %s, Traversal 3 - %s", out[0], out[1], out[2]);
 
      }
-     private static boolean verifyInner(int[] inorder, int[] preorder, int[] postorder) {
-          if (inorder.length == 0) return true;
-          if (inorder.length == 1) {
-               return inorder[0] == preorder[0] && preorder[0] == postorder[0];
+     private static boolean verifyInner(List<Integer> inorder, List<Integer> preorder, List<Integer> postorder) {
+          if (inorder.isEmpty()) return true;
+          if (inorder.size() == 1) {
+               return inorder.getFirst() == preorder.getFirst() && preorder.getFirst() == postorder.getFirst();
           }
 
-          int root = preorder[0];
-          int inorderRootElemIndex = -1;
-          for (int j = 0; j < inorder.length; j++) {
-               if (inorder[j] == root) {
-                    inorderRootElemIndex = j;
-                    break;
-               }
-          }
-          if (inorderRootElemIndex == -1) return false;
+          int root = preorder.getFirst();
+          int inorderRootElemIndex = Collections.binarySearch(inorder, root);
+          if (inorderRootElemIndex < 0) return false;
 
           int leftBranchLength = inorderRootElemIndex;
-          int rightBranchLength = inorder.length - 1 - leftBranchLength;
+          int rightBranchLength = inorder.size() - 1 - leftBranchLength;
           
-          int[] preorderLeftBranch = Arrays.copyOfRange(preorder, 1, 1 + leftBranchLength);
-          int[] preorderRightBranch = Arrays.copyOfRange(preorder, 1 + leftBranchLength, 1 + leftBranchLength + rightBranchLength);
-          int[] postorderLeftBranch = Arrays.copyOfRange(postorder, 0, leftBranchLength);
-          int[] postorderRightBranch = Arrays.copyOfRange(postorder, leftBranchLength, leftBranchLength + rightBranchLength);
-          int[] inorderLeftBranch = Arrays.copyOfRange(inorder, 0, leftBranchLength);
-          int[] inorderRightBranch = Arrays.copyOfRange(inorder, inorderRootElemIndex + 1, inorderRootElemIndex + rightBranchLength + 1);
-
-          if (preorderLeftBranch.length != 0 && preorderLeftBranch[0] >= root) return false;
-          if (preorderRightBranch.length != 0 && preorderRightBranch[0] <= root) return false;
+          List<Integer> preorderLeftBranch = preorder.subList(1, 1 + leftBranchLength);
+          List<Integer> preorderRightBranch = preorder.subList(1 + leftBranchLength, 1 + leftBranchLength + rightBranchLength);
+          List<Integer> postorderLeftBranch = postorder.subList(0, leftBranchLength);
+          List<Integer> postorderRightBranch = postorder.subList(leftBranchLength, leftBranchLength + rightBranchLength);
+          List<Integer> inorderLeftBranch = inorder.subList(0, leftBranchLength);
+          List<Integer> inorderRightBranch = inorder.subList(inorderRootElemIndex + 1, inorderRootElemIndex + rightBranchLength + 1);
+          if (!preorderLeftBranch.isEmpty() && preorderLeftBranch.getFirst() >= root) return false;
+          if (!preorderRightBranch.isEmpty() && preorderRightBranch.getFirst() <= root) return false;
 
           boolean leftBranchResult = verifyInner(inorderLeftBranch, preorderLeftBranch, postorderLeftBranch);
           boolean rightBranchResult = verifyInner(inorderRightBranch, preorderRightBranch, postorderRightBranch);
