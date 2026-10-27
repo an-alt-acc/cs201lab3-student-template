@@ -79,7 +79,7 @@ public class Q1Test {
           int inorderIndex = 0;
           outer: for (int[] traversal : traversals) {
                for (int j = 0; j < traversal.length - 1; j++) {
-                    if (traversal[j] > traversal[j+1]) {
+                    if (traversal[j] >= traversal[j+1]) {
                          inorderIndex++;
                          continue outer;
                     }
@@ -141,14 +141,11 @@ public class Q1Test {
           System.out.println(Arrays.deepToString(new int[][] {inorderRightBranch, preorderRightBranch, postorderRightBranch}));
           System.out.println();
 
-          if (preorderLeftBranch.length != 0 && preorderLeftBranch[0] > root) return false;
-          if (preorderRightBranch.length != 0 && preorderRightBranch[0] < root) return false;
+          if (preorderLeftBranch.length != 0 && preorderLeftBranch[0] >= root) return false;
+          if (preorderRightBranch.length != 0 && preorderRightBranch[0] <= root) return false;
 
           boolean leftBranchResult = verifyInner(inorderLeftBranch, preorderLeftBranch, postorderLeftBranch);
           boolean rightBranchResult = verifyInner(inorderRightBranch, preorderRightBranch, postorderRightBranch);
-          if (!leftBranchResult) return false;
-          if (!rightBranchResult) return false;
-
-          return true;
+          return leftBranchResult && rightBranchResult;
      }
 }
