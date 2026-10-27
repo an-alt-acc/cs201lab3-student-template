@@ -108,7 +108,7 @@ public class Q1Test {
           if (preorder == null) return "Invalid traversals";
 
           if (!verifyInner(inorder, preorder, postorder)) return "Invalid traversals";
-          return String.format("Traversal 1 - %s, Traversal 2 - %s, Traversal 3 - %s", out[0], out[1], out[2]);
+          return String.format("Traversal 1 - %s, Traversal 2 - %s, Traversal 3 - %s%n", out[0], out[1], out[2]);
 
      }
      private static boolean verifyInner(int[] inorder, int[] preorder, int[] postorder) {
