@@ -82,73 +82,79 @@ public class Q1Test {
 
      }
      private static String[] verifyInner(int[][] traversals) {
-          System.out.println(Arrays.deepToString(traversals));
           if (traversals[0].length == 0) return new String[]{};
           if (traversals[0].length == 1 && traversals[0][0] == traversals[1][0] && traversals[1][0] == traversals[2][0]) return new String[]{};
-          if (traversals[0].length == 2) {
-               if (Arrays.equals(traversals[0], traversals[1]) && Arrays.equals(traversals[0], new int[] {traversals[2][1], traversals[2][0]})) return new String[]{};
-               if (Arrays.equals(traversals[0], traversals[2]) && Arrays.equals(traversals[0], new int[] {traversals[1][1], traversals[1][0]})) return new String[]{};
-               if (Arrays.equals(traversals[2], traversals[1]) && Arrays.equals(traversals[1], new int[] {traversals[0][1], traversals[0][0]})) return new String[]{};
-               return null;
-          }
+          
+          String[] out = new String[3];
 
-          List<Integer> roots = new ArrayList<>();
-          List<Integer> preorderIndices = new ArrayList<>();
-          List<Integer> postorderIndices = new ArrayList<>();
-          for (int i = 0; i <= 2; i++) {
-               for (int j = 0; j <= 2; j++) {
-                    if (traversals[i][0] == traversals[j][traversals[j].length - 1]) {
-                         roots.add(traversals[i][0]);
-                         preorderIndices.add(i);
-                         postorderIndices.add(j);
+          int[] inorder = null;
+          int inorderIndex = 0;
+          outer: for (int[] traversal : traversals) {
+               for (int j = 0; j < traversal.length - 1; j++) {
+                    if (traversal[j] > traversal[j+1]) {
+                         inorderIndex++;
+                         continue outer;
                     }
                }
+               inorder = traversal;
+               out[inorderIndex] = "Inorder";
+               break;
           }
-          if (roots.isEmpty()) return null;
+          if (inorder == null) return null;
 
-          for (int i = 0; i < roots.size(); i++) {
-               int root = roots.get(i);
-               int preorderIndex = preorderIndices.get(i);
-               int postorderIndex = postorderIndices.get(i);
+          int[] traversal1 = traversals[inorderIndex == 0 ? 2 : 0];
+          int[] traversal2 = traversals[inorderIndex == 1 ? 2 : 1];
+          int[] preorder = null;
+          int[] postorder = null;
+          int root = -1;
+          if (traversal1[0] == traversal2[traversal2.length - 1]) {
+               preorder = traversal1;
+               postorder = traversal2;
+               out[inorderIndex == 0 ? 2 : 0] = "Preorder";
+               out[inorderIndex == 1 ? 2 : 1] = "Postorder";
+               root = traversal1[0];
+          } else if (traversal1[traversal1.length - 1] == traversal2[0]) {
+               // if (preorder != null) return null;
+               preorder = traversal2;
+               postorder = traversal1;
+               out[inorderIndex == 1 ? 2 : 1] = "Preorder";
+               out[inorderIndex == 0 ? 2 : 0] = "Postorder";
+               root = traversal2[0];
+          }
+          if (preorder == null) return null;
 
-               Set<Integer> indices = new HashSet<>(Set.of(0, 1, 2));
-               indices.remove(preorderIndex);
-               indices.remove(postorderIndex);
-               int inorderIndex = indices.iterator().next();
 
-               int inorderRootElemIndex = -1;
-               for (int j = 0; j < traversals[inorderIndex].length; j++) {
-                    if (traversals[inorderIndex][j] == root) {
-                         inorderRootElemIndex = j;
-                         break;
-                    }
+          int inorderRootElemIndex = -1;
+          for (int j = 0; j < inorder.length; j++) {
+               if (inorder[j] == root) {
+                    inorderRootElemIndex = j;
+                    break;
                }
-               System.out.printf("%s @ [%d][%d]%n", root, inorderIndex, inorderRootElemIndex);
-               if (inorderRootElemIndex == -1) continue;
-
-               int leftBranchLength = inorderRootElemIndex;
-               int rightBranchLength = traversals[inorderIndex].length - 1 - leftBranchLength;
-               
-               int[] preorderLeftBranch = Arrays.copyOfRange(traversals[preorderIndex], 1, 1 + leftBranchLength);
-               int[] preorderRightBranch = Arrays.copyOfRange(traversals[preorderIndex], 1 + leftBranchLength, 1 + leftBranchLength + rightBranchLength);
-               int[] postorderLeftBranch = Arrays.copyOfRange(traversals[postorderIndex], 0, leftBranchLength);
-               int[] postorderRightBranch = Arrays.copyOfRange(traversals[postorderIndex], leftBranchLength, leftBranchLength + rightBranchLength);
-               int[] inorderLeftBranch = Arrays.copyOfRange(traversals[inorderIndex], 0, leftBranchLength);
-               int[] inorderRightBranch = Arrays.copyOfRange(traversals[inorderIndex], inorderRootElemIndex + 1, inorderRootElemIndex + rightBranchLength + 1);
-
-               if (preorderLeftBranch.length != 0 && preorderLeftBranch[0] > root) continue;
-               if (preorderRightBranch.length != 0 && preorderRightBranch[0] < root) continue;
-
-               String[] leftBranchResult = verifyInner(new int[][] {preorderLeftBranch, postorderLeftBranch, inorderLeftBranch});
-               String[] rightBranchResult = verifyInner(new int[][] {preorderRightBranch, postorderRightBranch, inorderRightBranch});
-               if (leftBranchResult == null || (leftBranchResult.length != 0 && !Arrays.deepEquals(leftBranchResult, new String[] {"Preorder", "Postorder", "Inorder"}))) continue;
-               if (rightBranchResult == null || (rightBranchResult.length != 0 && !Arrays.deepEquals(rightBranchResult, new String[] {"Preorder", "Postorder", "Inorder"}))) continue;
-
-               String traversal1Type = preorderIndex == 0 ? "Preorder" : inorderIndex == 0 ? "Inorder" : "Postorder";
-               String traversal2Type = preorderIndex == 1 ? "Preorder" : inorderIndex == 1 ? "Inorder" : "Postorder";
-               String traversal3Type = preorderIndex == 2 ? "Preorder" : inorderIndex == 2 ? "Inorder" : "Postorder";
-               return new String[] {traversal1Type, traversal2Type, traversal3Type};
           }
-          return null;
+          if (inorderRootElemIndex == -1) return null;
+
+          System.out.println(Arrays.deepToString(traversals));
+          System.out.println(Arrays.deepToString(out));
+
+          int leftBranchLength = inorderRootElemIndex;
+          int rightBranchLength = inorder.length - 1 - leftBranchLength;
+          
+          int[] preorderLeftBranch = Arrays.copyOfRange(preorder, 1, 1 + leftBranchLength);
+          int[] preorderRightBranch = Arrays.copyOfRange(preorder, 1 + leftBranchLength, 1 + leftBranchLength + rightBranchLength);
+          int[] postorderLeftBranch = Arrays.copyOfRange(postorder, 0, leftBranchLength);
+          int[] postorderRightBranch = Arrays.copyOfRange(postorder, leftBranchLength, leftBranchLength + rightBranchLength);
+          int[] inorderLeftBranch = Arrays.copyOfRange(inorder, 0, leftBranchLength);
+          int[] inorderRightBranch = Arrays.copyOfRange(inorder, inorderRootElemIndex + 1, inorderRootElemIndex + rightBranchLength + 1);
+
+          System.out.println(Arrays.deepToString(new int[][] {preorderLeftBranch, postorderLeftBranch, inorderLeftBranch}));
+          System.out.println(Arrays.deepToString(new int[][] {preorderRightBranch, postorderRightBranch, inorderRightBranch}));
+          System.out.println();
+
+          String[] leftBranchResult = verifyInner(new int[][] {preorderLeftBranch, postorderLeftBranch, inorderLeftBranch});
+          String[] rightBranchResult = verifyInner(new int[][] {preorderRightBranch, postorderRightBranch, inorderRightBranch});
+          if (leftBranchResult == null) return null;
+          if (rightBranchResult == null)return null;
+
+          return out;
      }
 }
