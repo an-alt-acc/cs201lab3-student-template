@@ -141,6 +141,9 @@ public class Q1Test {
           System.out.println(Arrays.deepToString(new int[][] {inorderRightBranch, preorderRightBranch, postorderRightBranch}));
           System.out.println();
 
+          if (preorderLeftBranch[0] > root) return false;
+          if (preorderRightBranch[0] < root) return false;
+
           boolean leftBranchResult = verifyInner(inorderLeftBranch, preorderLeftBranch, postorderLeftBranch);
           boolean rightBranchResult = verifyInner(inorderRightBranch, preorderRightBranch, postorderRightBranch);
           if (!leftBranchResult) return false;
