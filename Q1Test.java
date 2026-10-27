@@ -82,6 +82,7 @@ public class Q1Test {
 
      }
      private static String[] verifyInner(int[][] traversals) {
+          if (!(traversals[0].length == traversals[1].length && traversals[1].length == traversals[2].length)) return null;
           if (traversals[0].length == 0) return new String[]{};
           if (traversals[0].length == 1 && traversals[0][0] == traversals[1][0] && traversals[1][0] == traversals[2][0]) return new String[]{};
           
@@ -153,7 +154,7 @@ public class Q1Test {
           String[] leftBranchResult = verifyInner(new int[][] {preorderLeftBranch, postorderLeftBranch, inorderLeftBranch});
           String[] rightBranchResult = verifyInner(new int[][] {preorderRightBranch, postorderRightBranch, inorderRightBranch});
           if (leftBranchResult == null) return null;
-          if (rightBranchResult == null)return null;
+          if (rightBranchResult == null) return null;
 
           return out;
      }
