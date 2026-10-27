@@ -95,12 +95,12 @@ public class Q1Test {
           List<Integer> traversalB = traversals[inorderIndex == 1 ? 2 : 1];
           List<Integer> preorder = null;
           List<Integer> postorder = null;
-          if (traversalA.getFirst() == traversalB.getLast()) {
+          if (traversalA.get(0) == traversalB.get(traversalB.size() - 1)) {
                preorder = traversalA;
                postorder = traversalB;
                out[inorderIndex == 0 ? 2 : 0] = "Preorder";
                out[inorderIndex == 1 ? 2 : 1] = "Postorder";
-          } else if (traversalA.getLast() == traversalB.getFirst()) {
+          } else if (traversalA.get(traversalA.size() - 1) == traversalB.get(0)) {
                preorder = traversalB;
                postorder = traversalA;
                out[inorderIndex == 1 ? 2 : 1] = "Preorder";
@@ -115,10 +115,10 @@ public class Q1Test {
      private static boolean verifyInner(List<Integer> inorder, List<Integer> preorder, List<Integer> postorder) {
           if (inorder.isEmpty()) return true;
           if (inorder.size() == 1) {
-               return inorder.getFirst() == preorder.getFirst() && preorder.getFirst() == postorder.getFirst();
+               return inorder.get(0) == preorder.get(0) && preorder.get(0) == postorder.get(0);
           }
 
-          int root = preorder.getFirst();
+          int root = preorder.get(0);
           int inorderRootElemIndex = Collections.binarySearch(inorder, root);
           if (inorderRootElemIndex < 0) return false;
 
@@ -131,8 +131,8 @@ public class Q1Test {
           List<Integer> postorderRightBranch = postorder.subList(leftBranchLength, leftBranchLength + rightBranchLength);
           List<Integer> inorderLeftBranch = inorder.subList(0, leftBranchLength);
           List<Integer> inorderRightBranch = inorder.subList(inorderRootElemIndex + 1, inorderRootElemIndex + rightBranchLength + 1);
-          if (!preorderLeftBranch.isEmpty() && preorderLeftBranch.getFirst() >= root) return false;
-          if (!preorderRightBranch.isEmpty() && preorderRightBranch.getFirst() <= root) return false;
+          if (!preorderLeftBranch.isEmpty() && preorderLeftBranch.get(0) >= root) return false;
+          if (!preorderRightBranch.isEmpty() && preorderRightBranch.get(0) <= root) return false;
 
           boolean leftBranchResult = verifyInner(inorderLeftBranch, preorderLeftBranch, postorderLeftBranch);
           boolean rightBranchResult = verifyInner(inorderRightBranch, preorderRightBranch, postorderRightBranch);
