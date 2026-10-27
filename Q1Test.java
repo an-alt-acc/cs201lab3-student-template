@@ -1,7 +1,9 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class Q1Test {
@@ -85,52 +87,59 @@ public class Q1Test {
                return "Invalid traversals";
           }
 
-          List<String> roots = new ArrayList<>();
-          List<Integer> preorderIndices = new ArrayList<>();
-          List<Integer> postorderIndices = new ArrayList<>();
+          // root -> [(preorderIndex, postorderIndex), ...]
+          Map<String, List<Integer[]>> result = new HashMap<>();
           for (int i = 0; i <= 2; i++) {
                for (int j = 0; j <= 2; j++) {
                     if (traversals[i][0].equals(traversals[j][traversals[j].length - 1])) {
-                         roots.add(traversals[i][0]);
-                         preorderIndices.add(i);
-                         postorderIndices.add(j);
+                         if (!result.containsKey(traversals[i][0])) result.put(traversals[i][0], new ArrayList<>());
+                         result.get(traversals[i][0]).add(new Integer[] {i, j});
                     }
                }
           }
-          if (roots.isEmpty()) return "Invalid traversals";
+          if (result.isEmpty()) return "Invalid traversals";
 
-          for (int i = 0; i < roots.size(); i++) {
-               String root = roots.get(i);
-               int preorderIndex = preorderIndices.get(i);
-               int postorderIndex = postorderIndices.get(i);
+          String finalRoot = null;
+          String finalResult = null;
+          for (Map.Entry<String, List<Integer[]>> entry : result.entrySet()) {
+               String root = entry.getKey();
+               for (Integer[] indices : entry.getValue()) {
+                    int preorderIndex = indices[0];
+                    int postorderIndex = indices[1];
+                    System.out.printf("%s %d %d%n", root, preorderIndex, postorderIndex);
+                    Set<Integer> allIndices = new HashSet<>(Set.of(0, 1, 2));
+                    allIndices.remove(preorderIndex);
+                    allIndices.remove(postorderIndex);
+                    int inorderIndex = allIndices.iterator().next();
 
-               Set<Integer> indices = new HashSet<>(Set.of(0, 1, 2));
-               indices.remove(preorderIndex);
-               indices.remove(postorderIndex);
-               int inorderIndex = indices.iterator().next();
+                    int inorderRootElemIndex = Arrays.asList(traversals[inorderIndex]).indexOf(root);
+                    System.out.printf("%s @ [%d][%d]%n", root, inorderIndex, inorderRootElemIndex);
+                    if (inorderRootElemIndex == -1) continue;
 
-               int inorderRootElemIndex = Arrays.asList(traversals[inorderIndex]).indexOf(root);
-               System.out.printf("%s @ [%d][%d]%n", root, inorderIndex, inorderRootElemIndex);
-               if (inorderRootElemIndex == -1) continue;
+                    int leftBranchLength = inorderRootElemIndex;
+                    int rightBranchLength = traversals[inorderIndex].length - 1 - leftBranchLength;
+                    
+                    String[] preorderLeftBranch = Arrays.copyOfRange(traversals[preorderIndex], 1, 1 + leftBranchLength);
+                    String[] preorderRightBranch = Arrays.copyOfRange(traversals[preorderIndex], 1 + leftBranchLength, 1 + leftBranchLength + rightBranchLength);
+                    String[] postorderLeftBranch = Arrays.copyOfRange(traversals[postorderIndex], 0, leftBranchLength);
+                    String[] postorderRightBranch = Arrays.copyOfRange(traversals[postorderIndex], leftBranchLength, leftBranchLength + rightBranchLength);
+                    String[] inorderLeftBranch = Arrays.copyOfRange(traversals[inorderIndex], 0, leftBranchLength);
+                    String[] inorderRightBranch = Arrays.copyOfRange(traversals[inorderIndex], inorderRootElemIndex + 1, inorderRootElemIndex + rightBranchLength + 1);
 
-               int leftBranchLength = inorderRootElemIndex;
-               int rightBranchLength = traversals[inorderIndex].length - 1 - leftBranchLength;
-               
-               String[] preorderLeftBranch = Arrays.copyOfRange(traversals[preorderIndex], 1, 1 + leftBranchLength);
-               String[] preorderRightBranch = Arrays.copyOfRange(traversals[preorderIndex], 1 + leftBranchLength, 1 + leftBranchLength + rightBranchLength);
-               String[] postorderLeftBranch = Arrays.copyOfRange(traversals[postorderIndex], 0, leftBranchLength);
-               String[] postorderRightBranch = Arrays.copyOfRange(traversals[postorderIndex], leftBranchLength, leftBranchLength + rightBranchLength);
-               String[] inorderLeftBranch = Arrays.copyOfRange(traversals[inorderIndex], 0, leftBranchLength);
-               String[] inorderRightBranch = Arrays.copyOfRange(traversals[inorderIndex], inorderRootElemIndex + 1, inorderRootElemIndex + rightBranchLength + 1);
+                    if (verifyInner(new String[][] {preorderLeftBranch, postorderLeftBranch, inorderLeftBranch}).equals("Invalid traversals")) continue;
+                    if (verifyInner(new String[][] {preorderRightBranch, postorderRightBranch, inorderRightBranch}).equals("Invalid traversals")) continue;
 
-               if (verifyInner(new String[][] {preorderLeftBranch, postorderLeftBranch, inorderLeftBranch}).equals("Invalid traversals")) continue;
-               if (verifyInner(new String[][] {preorderRightBranch, postorderRightBranch, inorderRightBranch}).equals("Invalid traversals")) continue;
-               
-               String traversal1Type = preorderIndex == 0 ? "Preorder" : inorderIndex == 0 ? "Inorder" : "Postorder";
-               String traversal2Type = preorderIndex == 1 ? "Preorder" : inorderIndex == 1 ? "Inorder" : "Postorder";
-               String traversal3Type = preorderIndex == 2 ? "Preorder" : inorderIndex == 2 ? "Inorder" : "Postorder";
-               return String.format("Traversal 1 - %s, Traversal 2 - %s, Traversal 3 - %s", traversal1Type, traversal2Type, traversal3Type);
+                    String traversal1Type = preorderIndex == 0 ? "Preorder" : inorderIndex == 0 ? "Inorder" : "Postorder";
+                    String traversal2Type = preorderIndex == 1 ? "Preorder" : inorderIndex == 1 ? "Inorder" : "Postorder";
+                    String traversal3Type = preorderIndex == 2 ? "Preorder" : inorderIndex == 2 ? "Inorder" : "Postorder";
+                    finalResult = String.format("Traversal 1 - %s, Traversal 2 - %s, Traversal 3 - %s", traversal1Type, traversal2Type, traversal3Type);
+                    System.out.println(finalResult);
+               }
+               if (finalResult != null) {
+                    if (finalRoot != null) return "Invalid traversals";
+                    finalRoot = root;
+               }
           }
-          return "Invalid traversals";
+          return finalResult == null ? "Invalid traversals" : finalResult;
      }
 }
