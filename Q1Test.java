@@ -70,30 +70,34 @@ public class Q1Test {
 
       // write your codes here
      public static String verify(String traversal1, String traversal2, String traversal3){
-          String[][] traversals = {traversal1.split("-"), traversal2.split("-"), traversal3.split("-")};
+          int[][] traversals = {
+               Arrays.stream(traversal1.split("-")).mapToInt(Integer::parseInt).toArray(),
+               Arrays.stream(traversal2.split("-")).mapToInt(Integer::parseInt).toArray(),
+               Arrays.stream(traversal3.split("-")).mapToInt(Integer::parseInt).toArray(),
+          };
           if (!(traversals[0].length == traversals[1].length && traversals[1].length == traversals[2].length)) return "Invalid traversals";
           String[] result = verifyInner(traversals);
           if (result == null) return "Invalid traversals";
           return String.format("Traversal 1 - %s, Traversal 2 - %s, Traversal 3 - %s", result[0], result[1], result[2]);
 
      }
-     private static String[] verifyInner(String[][] traversals) {
+     private static String[] verifyInner(int[][] traversals) {
           System.out.println(Arrays.deepToString(traversals));
           if (traversals[0].length == 0) return new String[]{};
-          if (traversals[0].length == 1 && traversals[0][0].equals(traversals[1][0]) && traversals[1][0].equals(traversals[2][0])) return new String[]{};
+          if (traversals[0].length == 1 && traversals[0][0] == traversals[1][0] && traversals[1][0] == traversals[2][0]) return new String[]{};
           if (traversals[0].length == 2) {
-               if (Arrays.deepEquals(traversals[0], traversals[1]) && Arrays.deepEquals(traversals[0], new String[] {traversals[2][1], traversals[2][0]})) return new String[]{};
-               if (Arrays.deepEquals(traversals[0], traversals[2]) && Arrays.deepEquals(traversals[0], new String[] {traversals[1][1], traversals[1][0]})) return new String[]{};
-               if (Arrays.deepEquals(traversals[2], traversals[1]) && Arrays.deepEquals(traversals[1], new String[] {traversals[0][1], traversals[0][0]})) return new String[]{};
+               if (Arrays.equals(traversals[0], traversals[1]) && Arrays.equals(traversals[0], new int[] {traversals[2][1], traversals[2][0]})) return new String[]{};
+               if (Arrays.equals(traversals[0], traversals[2]) && Arrays.equals(traversals[0], new int[] {traversals[1][1], traversals[1][0]})) return new String[]{};
+               if (Arrays.equals(traversals[2], traversals[1]) && Arrays.equals(traversals[1], new int[] {traversals[0][1], traversals[0][0]})) return new String[]{};
                return null;
           }
 
-          List<String> roots = new ArrayList<>();
+          List<Integer> roots = new ArrayList<>();
           List<Integer> preorderIndices = new ArrayList<>();
           List<Integer> postorderIndices = new ArrayList<>();
           for (int i = 0; i <= 2; i++) {
                for (int j = 0; j <= 2; j++) {
-                    if (traversals[i][0].equals(traversals[j][traversals[j].length - 1])) {
+                    if (traversals[i][0] == traversals[j][traversals[j].length - 1]) {
                          roots.add(traversals[i][0]);
                          preorderIndices.add(i);
                          postorderIndices.add(j);
@@ -103,7 +107,7 @@ public class Q1Test {
           if (roots.isEmpty()) return null;
 
           for (int i = 0; i < roots.size(); i++) {
-               String root = roots.get(i);
+               int root = roots.get(i);
                int preorderIndex = preorderIndices.get(i);
                int postorderIndex = postorderIndices.get(i);
 
@@ -112,22 +116,31 @@ public class Q1Test {
                indices.remove(postorderIndex);
                int inorderIndex = indices.iterator().next();
 
-               int inorderRootElemIndex = Arrays.asList(traversals[inorderIndex]).indexOf(root);
+               int inorderRootElemIndex = -1;
+               for (int j = 0; j < traversals[inorderIndex].length; j++) {
+                    if (traversals[inorderIndex][j] == root) {
+                         inorderRootElemIndex = j;
+                         break;
+                    }
+               }
                System.out.printf("%s @ [%d][%d]%n", root, inorderIndex, inorderRootElemIndex);
                if (inorderRootElemIndex == -1) continue;
 
                int leftBranchLength = inorderRootElemIndex;
                int rightBranchLength = traversals[inorderIndex].length - 1 - leftBranchLength;
                
-               String[] preorderLeftBranch = Arrays.copyOfRange(traversals[preorderIndex], 1, 1 + leftBranchLength);
-               String[] preorderRightBranch = Arrays.copyOfRange(traversals[preorderIndex], 1 + leftBranchLength, 1 + leftBranchLength + rightBranchLength);
-               String[] postorderLeftBranch = Arrays.copyOfRange(traversals[postorderIndex], 0, leftBranchLength);
-               String[] postorderRightBranch = Arrays.copyOfRange(traversals[postorderIndex], leftBranchLength, leftBranchLength + rightBranchLength);
-               String[] inorderLeftBranch = Arrays.copyOfRange(traversals[inorderIndex], 0, leftBranchLength);
-               String[] inorderRightBranch = Arrays.copyOfRange(traversals[inorderIndex], inorderRootElemIndex + 1, inorderRootElemIndex + rightBranchLength + 1);
+               int[] preorderLeftBranch = Arrays.copyOfRange(traversals[preorderIndex], 1, 1 + leftBranchLength);
+               int[] preorderRightBranch = Arrays.copyOfRange(traversals[preorderIndex], 1 + leftBranchLength, 1 + leftBranchLength + rightBranchLength);
+               int[] postorderLeftBranch = Arrays.copyOfRange(traversals[postorderIndex], 0, leftBranchLength);
+               int[] postorderRightBranch = Arrays.copyOfRange(traversals[postorderIndex], leftBranchLength, leftBranchLength + rightBranchLength);
+               int[] inorderLeftBranch = Arrays.copyOfRange(traversals[inorderIndex], 0, leftBranchLength);
+               int[] inorderRightBranch = Arrays.copyOfRange(traversals[inorderIndex], inorderRootElemIndex + 1, inorderRootElemIndex + rightBranchLength + 1);
 
-               String[] leftBranchResult = verifyInner(new String[][] {preorderLeftBranch, postorderLeftBranch, inorderLeftBranch});
-               String[] rightBranchResult = verifyInner(new String[][] {preorderRightBranch, postorderRightBranch, inorderRightBranch});
+               if (preorderLeftBranch.length != 0 && preorderLeftBranch[0] > root) continue;
+               if (preorderRightBranch.length != 0 && preorderRightBranch[0] < root) continue;
+
+               String[] leftBranchResult = verifyInner(new int[][] {preorderLeftBranch, postorderLeftBranch, inorderLeftBranch});
+               String[] rightBranchResult = verifyInner(new int[][] {preorderRightBranch, postorderRightBranch, inorderRightBranch});
                if (leftBranchResult == null || (leftBranchResult.length != 0 && !Arrays.deepEquals(leftBranchResult, new String[] {"Preorder", "Postorder", "Inorder"}))) continue;
                if (rightBranchResult == null || (rightBranchResult.length != 0 && !Arrays.deepEquals(rightBranchResult, new String[] {"Preorder", "Postorder", "Inorder"}))) continue;
 
